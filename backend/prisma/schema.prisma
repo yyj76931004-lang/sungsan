@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Member {
+  id          String       @id @default(uuid())
+  name        String
+  baptismName String       @map("baptism_name")
+  birthDate   DateTime     @map("birth_date")
+  baptismDate DateTime     @map("baptism_date")
+  phone       String
+  address     String
+  status      MemberStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  sacraments  Sacrament[]
+
+  @@map("members")
+}
+
+model Sacrament {
+  id       String        @id @default(uuid())
+  memberId String        @map("member_id")
+  type     SacramentType
+  date     DateTime
+  note     String?
+  member   Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("sacraments")
+}
+
+model Finance {
+  id          String      @id @default(uuid())
+  type        FinanceType
+  category    String
+  amount      Int
+  date        DateTime
+  description String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  @@map("finances")
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SacramentType {
+  BAPTISM
+  CONFIRMATION
+  MARRIAGE
+  FUNERAL
+}
+
+enum FinanceType {
+  INCOME
+  EXPENSE
+}
